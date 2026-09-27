@@ -5,13 +5,13 @@
 
 Xiaomi limits bootloader unlock applications to a fixed daily quota (commonly reported as around 2,000). The quota resets at midnight Beijing time (UTC+8). This tool fires **30 parallel requests** at that reset moment to improve your chances of getting a slot.
 
-Log in, set your delay, and walk away. The tool handles the rest.
+Grab your token, set your delay, and walk away. The tool handles the rest.
 
 ---
 
 ## What does it do?
 
-- Logs into your Xiaomi account
+- Authenticates using your Xiaomi session token (extracted from browser)
 - Checks if your account is eligible
 - Syncs Beijing time from NTP servers (doesn't rely on your system clock)
 - At the right moment, sends **30 threaded requests** simultaneously
@@ -32,9 +32,8 @@ python main.py
 ```
 
 It will ask for:
-1. Xiaomi account (email or phone)
-2. Password
-3. Delay in ms — press Enter for default (100ms)
+1. Your `new_bbs_serviceToken` (see [How to get your token](#how-to-get-your-token) below)
+2. Delay in ms — press Enter for default (100ms)
 
 You can also pass the delay directly:
 
@@ -68,13 +67,27 @@ ping sgp-api.buy.mi.com
 | 100–300ms | `300–800` |
 | Over 300ms | `1000+` |
 
+## How to get your token
+
+Since Xiaomi now requires 2FA on all accounts (and removed the option to disable it), the tool can no longer log in with your email and password directly. Instead, you provide your session token extracted from the browser.
+
+1. Open **Firefox** or **Chrome** on your PC
+2. Install the **[Cookie Editor](https://addons.mozilla.org/addon/cookie-editor)** extension ([Chrome version](https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm))
+3. Go to **https://c.mi.com** and log in to your Xiaomi account
+4. Click the **Cookie Editor** extension icon in your toolbar
+5. Search for **`new_bbs_serviceToken`**
+6. Copy the **Value** field (a long string of characters)
+7. Paste it when the tool prompts you
+
+> ⚠️ **Keep your token private** — it grants full access to your Xiaomi account session. Never share it publicly.
+
 ## How it works
 
 ```
-Login → Status check → NTP sync → Wait → BURST (30 requests in ~450ms) → Done
+Token input → Status check → NTP sync → Wait → BURST (30 requests in ~450ms) → Done
 ```
 
-1. Authenticates with Xiaomi's API and grabs a session token
+1. Accepts your session token (extracted from browser cookies)
 2. Verifies your account can actually apply
 3. Pulls accurate Beijing time from 7 NTP servers
 4. Waits until the configured time before midnight
@@ -94,7 +107,7 @@ Once you get approved (process may vary by device/region):
 
 ```
 ├── main.py            # Entry point, CLI args
-├── auth.py            # Xiaomi account login
+├── auth.py            # Token-based authentication
 ├── bootloader.py      # BURST mode, 10 threaded requests
 ├── config.py          # Delay settings
 ├── device.py          # Device ID generation
@@ -117,7 +130,7 @@ Yes, with Pydroid 3 on Android. But PC gives better timing accuracy — use that
 Try again next day. Bump the delay up a bit (try 1500ms). The quota fills fast.
 
 **Does it work with 2FA enabled?**
-No. You need to temporarily disable 2FA for the login to work.
+Yes! The tool uses a token-based approach — you log in through your browser (which handles 2FA) and then paste the session token into the tool.
 
 ## Disclaimer
 
