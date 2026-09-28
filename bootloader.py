@@ -55,11 +55,11 @@ def request_worker(
     """
     try:
         request_time = get_synchronized_beijing_time(start_beijing_time, start_timestamp)
-        print(f"🚀 Thread-{thread_id} gönderildi: {request_time.strftime('%H:%M:%S.%f')}")
+        print(f"🚀 Thread-{thread_id} sent: {request_time.strftime('%H:%M:%S.%f')}")
 
         response = session.make_request('POST', url, headers=headers)
         if response is None:
-            print(Fore.RED + f"   Thread-{thread_id}: Bağlantı hatası")
+            print(Fore.RED + f"   Thread-{thread_id}: Connection error")
             return
 
         response_data = response.data
@@ -71,23 +71,23 @@ def request_worker(
         if code == 0:
             apply_result = data.get("apply_result")
             if apply_result == 1:
-                print(Style.BRIGHT + Fore.GREEN + f"\n✅ [BAŞARILI] Başvuru ONAYLANDI! (Thread-{thread_id})" + Style.RESET_ALL)
+                print(Style.BRIGHT + Fore.GREEN + f"\n✅ [SUCCESS] Application APPROVED! (Thread-{thread_id})" + Style.RESET_ALL)
                 check_unlock_status(session, cookie_value, device_id)
             elif apply_result == 3:
                 deadline = data.get("deadline_format", "?")
-                print(Fore.YELLOW + f"   Thread-{thread_id}: Limit doldu, {deadline} tarihinde tekrar dene.")
+                print(Fore.YELLOW + f"   Thread-{thread_id}: Quota full, try again on {deadline}.")
             elif apply_result == 4:
                 deadline = data.get("deadline_format", "?")
-                print(Fore.YELLOW + f"   Thread-{thread_id}: Engelli, {deadline} tarihine kadar.")
+                print(Fore.YELLOW + f"   Thread-{thread_id}: Blocked until {deadline}.")
         elif code == 100001:
-            print(Fore.RED + f"   Thread-{thread_id}: İstek hatası (100001)")
+            print(Fore.RED + f"   Thread-{thread_id}: Request error (100001)")
         elif code == 100003:
-            print(Fore.GREEN + f"   Thread-{thread_id}: Muhtemelen onaylandı (100003), kontrol ediliyor...")
+            print(Fore.GREEN + f"   Thread-{thread_id}: Likely approved (100003), checking...")
             check_unlock_status(session, cookie_value, device_id)
         elif code is not None:
-            print(Fore.YELLOW + f"   Thread-{thread_id}: Bilinmeyen kod: {code}")
+            print(Fore.YELLOW + f"   Thread-{thread_id}: Unknown code: {code}")
         else:
-            print(Fore.RED + f"   Thread-{thread_id}: Yanıt kodu yok")
+            print(Fore.RED + f"   Thread-{thread_id}: No response code")
 
     except Exception:
         pass
@@ -111,8 +111,8 @@ def run_bootloader_unlock(cookie_value: str, feed_time_shift: float) -> None:
 
     start_beijing_time = get_initial_beijing_time()
     if start_beijing_time is None:
-        print(Fore.RED + "[Error] " + Fore.WHITE + "Pekin zamanı belirlenemedi.")
-        input("\nKapatmak için Enter'a bas...")
+        print(Fore.RED + "[Error] " + Fore.WHITE + "Could not determine Beijing time.")
+        input("\nPress Enter to exit...")
         exit()
 
     start_timestamp = time.time()
@@ -122,7 +122,7 @@ def run_bootloader_unlock(cookie_value: str, feed_time_shift: float) -> None:
         "Cookie": f"new_bbs_serviceToken={cookie_value};versionCode=500411;versionName=5.4.11;deviceId={device_id};"
     }
 
-    print(Style.BRIGHT + Fore.YELLOW + f"\n🔥 BURST MODE: {BURST_COUNT} paralel istek gönderiliyor..." + Style.RESET_ALL)
+    print(Style.BRIGHT + Fore.YELLOW + f"\n🔥 BURST MODE: Sending {BURST_COUNT} parallel requests..." + Style.RESET_ALL)
 
     threads = []
     for i in range(BURST_COUNT):
@@ -138,6 +138,6 @@ def run_bootloader_unlock(cookie_value: str, feed_time_shift: float) -> None:
         t.join()
 
     print(Style.BRIGHT + Fore.CYAN + "\n" + "=" * 60)
-    print("İşlem tamamlandı. Sonuçları yukarıdan kontrol edin.")
+    print("Process complete. Check the results above.")
     print("=" * 60 + Style.RESET_ALL)
-    input("\nKapatmak için Enter'a bas...")
+    input("\nPress Enter to exit...")
