@@ -1,6 +1,6 @@
 # Xiaomi Bootloader Unlocker
 
-[![GitHub Stars](https://img.shields.io/github/stars/mobilteknolojileri/xiaomi-bootloader-unlocker?style=flat-square)](https://github.com/mobilteknolojileri/xiaomi-bootloader-unlocker/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/sanrobin/xiaomi-bootloader-unlocker?style=flat-square)](https://github.com/sanrobin/xiaomi-bootloader-unlocker/stargazers)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
 Xiaomi limits bootloader unlock applications to a fixed daily quota (commonly reported as around 2,000). The quota resets at midnight Beijing time (UTC+8). This tool fires **30 parallel requests** at that reset moment to improve your chances of getting a slot.
